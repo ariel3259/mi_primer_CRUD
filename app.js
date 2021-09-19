@@ -3,7 +3,7 @@ const mysql=require('mysql');
 const cors=require('cors');
 const app=express();
 app.use(express.json());
-app.use(cors);
+app.use(cors());
 //conectar mysql
 var con = mysql.createConnection({
     host:'localhost',
@@ -17,8 +17,9 @@ con.connect((err)=>{
     if(err)throw err;
     console.log(' conexion  exitosa a la base de datos')
 })
+app.get('/',(req,res)=>res.send("pagina principal"));
 
-app.get('/',(req,res)=>res.send('Ruta INICIO'));
+
 //mostrar todos los  articulos
 app.get('/api/articulos',(req,res)=>{
     con.query('SELECT * FROM articulos',(err,filas)=>{
@@ -41,7 +42,8 @@ app.post('/api/articulos',(req,res)=>{
     let sql="INSERT INTO articulos SET ?";
     con.query(sql,data,(err,results)=>{
         if(err)throw err;
-        res.send(results);
+	Object.assign(data,{id:results.insertId})
+        res.send(data);
     });
 });
 
@@ -61,9 +63,9 @@ res.send(results);
 
 //eliminar articulo
 app.delete('/api/articulos/:id',(req,res)=>{
-con.query("delete from articulos where id=?",[req.params.id],(err)=>{
+con.query("delete from articulos where id=?",[req.params.id],(err,filas)=>{
     if(err)throw err;
-    res.send("Articulo Eliminado");
+    res.send(filas);
 });    
 });
 
